@@ -1,0 +1,12 @@
+{
+  "acoes": {
+    "dy_min": 5,
+    "roe_min": 15,
+    "pl_max": 15,
+    "pvp_max": 1.5
+  },
+  "gordon": {
+    "k": 0.1,
+    "g": 0.03
+  }
+}
