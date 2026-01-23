@@ -12,6 +12,7 @@ from pipeline import (
     transform_acoes,
     transform_fii,
 )
+from fetch_brapi import fetch_brapi_acoes, load_snapshot_acoes, load_tickers
 
 
 def parse_args() -> argparse.Namespace:
@@ -21,9 +22,25 @@ def parse_args() -> argparse.Namespace:
         default="config.json",
         help="Arquivo de configuração JSON (default: ./config.json)",
     )
-    p.add_argument("--acoes", required=True, help="Caminho do CSV de ações (sep=';')")
+    p.add_argument("--acoes", required=False, help="Caminho do CSV de ações (sep=';')")
     p.add_argument("--fii", required=False, help="(Opcional) Caminho do CSV de FIIs (sep=';')")
     p.add_argument("--out", default="out", help="Diretório de saída (default: ./out)")
+    p.add_argument(
+        "--source",
+        choices=["csv", "brapi", "snapshot"],
+        default="csv",
+        help="Fonte de dados para ações: csv, brapi ou snapshot (default: csv)",
+    )
+    p.add_argument(
+        "--tickers",
+        default="tickers.txt",
+        help="Arquivo com tickers para brapi (default: ./tickers.txt)",
+    )
+    p.add_argument(
+        "--snapshot",
+        default=None,
+        help="Caminho do snapshot JSON para --source snapshot",
+    )
 
     p.add_argument("--dy", type=float, default=None, help="DY mínimo para ações")
     p.add_argument("--roe", type=float, default=None, help="ROE mínimo para ações")
@@ -61,8 +78,20 @@ def main() -> None:
     ensure_dir(out_dir)
 
     # --- Ações
-    acoes_path = Path(args.acoes).expanduser().resolve()
-    df_acoes_raw = extract_csv(acoes_path, sep=";")
+    if args.source == "csv":
+        if not args.acoes:
+            raise SystemExit("Erro: --acoes é obrigatório quando --source=csv.")
+        acoes_path = Path(args.acoes).expanduser().resolve()
+        df_acoes_raw = extract_csv(acoes_path, sep=";")
+    elif args.source == "brapi":
+        tickers_path = Path(args.tickers).expanduser().resolve()
+        tickers = load_tickers(tickers_path)
+        df_acoes_raw = fetch_brapi_acoes(tickers, raw_dir=Path("data/raw"))
+    else:
+        if not args.snapshot:
+            raise SystemExit("Erro: --snapshot é obrigatório quando --source=snapshot.")
+        snapshot_path = Path(args.snapshot).expanduser().resolve()
+        df_acoes_raw = load_snapshot_acoes(snapshot_path)
 
     df_filtrado, df_graham, df_ranking = transform_acoes(
         df_acoes_raw,

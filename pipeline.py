@@ -102,12 +102,15 @@ def transform_acoes(
         df[col] = to_numeric_pt(df[col])
 
     df = df[
-        (df["P/L"] > 0) &
-        (df["ROE"] > 0) &
-        (df["DY"] >= 0)
+        ((df["P/L"] > 0) | df["P/L"].isna()) &
+        ((df["ROE"] > 0) | df["ROE"].isna()) &
+        ((df["DY"] >= 0) | df["DY"].isna())
     ].copy()
 
-    df_filtrado = df[(df["DY"] >= dy_min) & (df["ROE"] >= roe_min)].copy()
+    df_filtrado = df[
+        ((df["DY"] >= dy_min) | df["DY"].isna()) &
+        ((df["ROE"] >= roe_min) | df["ROE"].isna())
+    ].copy()
 
     if not apply_graham:
         return df_filtrado, None, build_ranking(df_filtrado)
@@ -135,11 +138,11 @@ def normalize_series(series: pd.Series, *, higher_better: bool) -> pd.Series:
 def build_ranking(df: pd.DataFrame) -> pd.DataFrame:
     df_rank = df[["TICKER", "DY", "ROE", "P/L", "P/VP", "DL/EBIT"]].copy()
 
-    df_rank["Norm_ROE"] = normalize_series(df_rank["ROE"], higher_better=True)
-    df_rank["Norm_DY"] = normalize_series(df_rank["DY"], higher_better=True)
-    df_rank["Norm_PL"] = normalize_series(df_rank["P/L"], higher_better=False)
-    df_rank["Norm_PVP"] = normalize_series(df_rank["P/VP"], higher_better=False)
-    df_rank["Norm_DL_EBIT"] = normalize_series(df_rank["DL/EBIT"], higher_better=False)
+    df_rank["Norm_ROE"] = normalize_series(df_rank["ROE"], higher_better=True).fillna(0.5)
+    df_rank["Norm_DY"] = normalize_series(df_rank["DY"], higher_better=True).fillna(0.5)
+    df_rank["Norm_PL"] = normalize_series(df_rank["P/L"], higher_better=False).fillna(0.5)
+    df_rank["Norm_PVP"] = normalize_series(df_rank["P/VP"], higher_better=False).fillna(0.5)
+    df_rank["Norm_DL_EBIT"] = normalize_series(df_rank["DL/EBIT"], higher_better=False).fillna(0.5)
 
     df_rank["Score"] = (
         (df_rank["Norm_ROE"] * 0.30) +

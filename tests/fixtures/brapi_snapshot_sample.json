@@ -1,0 +1,42 @@
+{
+  "fetched_at": "2024-01-01T12:00:00+00:00",
+  "count": 2,
+  "results": [
+    {
+      "ticker": "PETR4",
+      "data": {
+        "results": [
+          {
+            "symbol": "PETR4",
+            "regularMarketPrice": 35.5,
+            "dividendYield": 0.12,
+            "roe": 0.18,
+            "priceEarnings": 4.5,
+            "priceToBook": 1.1,
+            "earningsPerShare": 7.9,
+            "bookValue": 32.0,
+            "debtToEbitda": 1.8
+          }
+        ]
+      }
+    },
+    {
+      "ticker": "BBAS3",
+      "data": {
+        "results": [
+          {
+            "symbol": "BBAS3",
+            "regularMarketPrice": 52.3,
+            "dividendYield": 0.09,
+            "roe": 0.15,
+            "priceEarnings": 5.2,
+            "priceToBook": 0.9,
+            "earningsPerShare": 10.0,
+            "bookValue": 58.0,
+            "debtToEbitda": 2.2
+          }
+        ]
+      }
+    }
+  ]
+}
